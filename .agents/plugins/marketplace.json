@@ -1,0 +1,21 @@
+{
+  "name": "ai-tools",
+  "interface": {
+    "displayName": "ai-tools"
+  },
+  "plugins": [
+    {
+      "name": "directives",
+      "source": {
+        "source": "local",
+        "path": "./plugins/directives"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL",
+        "products": ["CODEX"]
+      },
+      "category": "Developer Tools"
+    }
+  ]
+}

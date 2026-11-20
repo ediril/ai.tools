@@ -1,0 +1,16 @@
+{
+  "name": "ai-tools",
+  "owner": {
+    "name": "Emrah Diril"
+  },
+  "description": "Personal agent skills for Claude Code and Codex.",
+  "plugins": [
+    {
+      "name": "directives",
+      "source": "./plugins/directives",
+      "description": "Keep the shared, project-agnostic directives in every project's AGENTS.md in sync.",
+      "homepage": "https://github.com/ediril/ai.tools",
+      "keywords": ["agents-md", "directives", "sync"]
+    }
+  ]
+}

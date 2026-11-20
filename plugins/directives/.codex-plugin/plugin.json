@@ -1,0 +1,20 @@
+{
+  "name": "directives",
+  "version": "0.1.0",
+  "description": "Keep the shared, project-agnostic directives in every project's AGENTS.md in sync.",
+  "author": {
+    "name": "Emrah Diril"
+  },
+  "homepage": "https://github.com/ediril/ai.tools",
+  "repository": "https://github.com/ediril/ai.tools",
+  "keywords": ["agents-md", "directives", "sync"],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "directives",
+    "shortDescription": "Sync shared AGENTS.md directives across projects",
+    "developerName": "Emrah Diril",
+    "category": "Developer Tools",
+    "capabilities": ["Interactive", "Read", "Write"],
+    "defaultPrompt": ["Sync the shared directives across my projects."]
+  }
+}
