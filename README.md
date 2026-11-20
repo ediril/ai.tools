@@ -24,6 +24,31 @@ codex plugin marketplace add ediril/ai.tools
 codex plugin add emd-directives@ai-tools
 ```
 
+To try a plugin in Claude Code without installing it, load it for one
+session: `claude --plugin-dir <path to ai.tools>/plugins/<plugin>`.
+
+## Running the directives sync
+
+`emd-directives:sync` assumes that all your projects sit side by side in one
+folder, together with your clone of this repo:
+
+```text
+projects/
+├── ai.tools/
+├── project-a/
+└── project-b/
+```
+
+Start the session from that folder, then run `/emd-directives:sync`. The sync
+sees only the projects inside the folder the session started in. Started from
+inside one project, or with projects spread across several folders, it can't
+read or update the projects it can't see, so the shared directives drift
+apart again.
+
+The sync also folds other agent instruction files, such as `CLAUDE.md` or
+`.cursorrules`, into each project's `AGENTS.md`, and removes them after you
+approve.
+
 ## Update
 
 Each plugin's version lives in its two `plugin.json` files. The tools update

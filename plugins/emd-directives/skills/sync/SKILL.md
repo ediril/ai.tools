@@ -23,23 +23,33 @@ The sync never moves, rewords, or removes a project-specific directive.
 
 ## Locations
 
-- **Projects:** every top-level folder of `~/Documents/^_PROJ` that has an
-  `AGENTS.md`, plus `ai.tools/` itself, which is a project like any other.
-  If the user names projects, read and write only those. If a project has no
+The sync assumes that all projects sit side by side in one folder, the
+**projects folder**, and that the session started there. It sees only the
+projects directly inside the session's folder.
+
+- **Projects:** every top-level folder of the projects folder that has an
+  `AGENTS.md` or one of the [other directive files](#other-directive-files),
+  plus the ai.tools checkout, which is a project like any other. If the user
+  names projects, read and write only those. If a project has no
   `AGENTS.md`, outbound proposes one.
-- **Master file:** `~/Documents/^_PROJ/ai.tools/directives/AGENTS.md`, in the
-  user's local checkout of the ai.tools repo, not in the installed plugin
-  copy. It is separate from the repo's own `ai.tools/AGENTS.md`. If the
-  checkout is missing, ask the user where it is.
+- **Master file:** `directives/AGENTS.md` in the user's local checkout of the
+  ai.tools repo, normally `ai.tools/` in the projects folder. Use the
+  checkout, not the installed plugin copy. The master file is separate from
+  the repo's own `AGENTS.md`. If there is no checkout in the projects folder,
+  ask the user where it is.
 - **Memory copies:** a project's directives may say that its Claude memory
   file is an exact copy of `AGENTS.md`. That file is `MEMORY.md` in
   `~/.claude/projects/<folder>/memory/`, where `<folder>` is the project's
   absolute path with every character other than a letter or digit replaced
-  by `-`. For example, `~/Documents/^_PROJ/ai.tools` maps to
-  `-Users-<user>-Documents---PROJ-ai-tools`.
+  by `-`. For example, `/Users/me/code/ai.tools` maps to
+  `-Users-me-code-ai-tools`.
 
-The sync works best from a session started in `~/Documents/^_PROJ`, so that
-every project is inside the session's folder.
+Before you start, check the session's folder. If it is itself a project (it
+has a `.git` folder or an `AGENTS.md`), or it holds fewer than two projects,
+tell the user: the sync can see only the projects inside this folder, so it
+can't gather directives from, or update, projects elsewhere. Suggest
+restarting the session from the folder that holds all the projects. Continue
+only if the user says so.
 
 ## No cached state
 
@@ -68,11 +78,36 @@ Last sync: 2026-11-19 21:30
 
 If the master file does not exist, follow [First run](#first-run).
 
+## Other directive files
+
+Other tools read their own instruction files. All of a project's directives
+belong in its `AGENTS.md`, so the sync consolidates these files into it:
+
+- In the project: `CLAUDE.md`, `GEMINI.md`, `.cursorrules`, `.cursor/rules/`,
+  `.windsurfrules`, `.clinerules`, and `.github/copilot-instructions.md`.
+- In the project's Claude memory folder: every file other than `MEMORY.md`.
+
+For each file you find:
+
+- If it is a symlink to `AGENTS.md`, it is already consolidated. Leave it.
+- Otherwise, compare each directive in it with `AGENTS.md`. Skip duplicates.
+  Treat every other directive as an addition to the project's `AGENTS.md`:
+  inbound sorts it into shared or project-specific like any other addition.
+  If a directive contradicts `AGENTS.md`, quote both and ask which holds.
+- Propose removing the file once its directives are in `AGENTS.md`. Before
+  you remove a `CLAUDE.md`, make sure Claude Code still reads the
+  directives: the project needs a memory copy of `AGENTS.md` or a symlink to
+  it.
+
+Leave personal, untracked files such as `CLAUDE.local.md` alone, and mention
+them in the report. Their content may not belong in a committed file.
+
 ## 1. Inbound: projects to master
 
 For each project:
 
-1. Read `AGENTS.md`.
+1. Read `AGENTS.md` and consolidate any
+   [other directive files](#other-directive-files).
 2. Read the project's changes to it since the last sync:
    - Committed: `git -C <project> log --since="<last sync>" -p -- AGENTS.md`
    - Uncommitted: `git -C <project> diff HEAD -- AGENTS.md`. Mention
@@ -143,7 +178,7 @@ Before you write anything, show the change set:
 - **Master:** each directive added, edited, or removed, with its source
   project and date.
 - **Per project:** each directive to add, update, or remove, and its target
-  section.
+  section, and each other directive file to consolidate and remove.
 - **Left alone:** local variants, respected removals, and directives
   judged not to fit, each with a one-line reason.
 
@@ -163,7 +198,8 @@ in or out of a project.
    - Do not reorder, reword, or reformat anything else.
 3. If the project keeps a memory copy, make it identical to the new
    `AGENTS.md`. If it is a symlink, do nothing.
-4. Do not commit unless the user asks. Remind the user that each project's
+4. Remove the other directive files that were approved for removal.
+5. Do not commit unless the user asks. Remind the user that each project's
    history is the record that the next sync reads. A sync's edits and
    decisions only count once they are committed. This includes the master
    file in ai.tools.
@@ -173,7 +209,8 @@ in or out of a project.
 1. Run `git -C <project> diff -- AGENTS.md` for each project you changed.
    Every hunk must match an approved change, and no project-specific line may
    change. Fix any hunk that does not match.
-2. Check that each memory copy is identical to its `AGENTS.md`.
+2. Check that each memory copy is identical to its `AGENTS.md`, and that
+   every directive from a removed file is in `AGENTS.md`.
 3. Report each project: the directives added, updated, and removed, with a
    short name for each, and the projects left unchanged.
 

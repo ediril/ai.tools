@@ -2,6 +2,17 @@
 
 Major version 0 started on 2026-11-19.
 
+## 0.0.5 (2026-11-19)
+
+- The sync no longer assumes one machine's folder layout. It treats the
+  session's folder as the folder that holds all projects, and warns if the
+  session started inside a project or a folder with fewer than two
+  projects.
+- The sync now consolidates other agent instruction files (`CLAUDE.md`,
+  `GEMINI.md`, Cursor, Windsurf, Cline, and Copilot rules, and extra Claude
+  memory files) into `AGENTS.md`, and proposes removing them. It leaves
+  personal files such as `CLAUDE.local.md` alone.
+
 ## 0.0.4 (2026-11-19)
 
 - Renamed the plugin from `directives` to `emd-directives`, so that it does
