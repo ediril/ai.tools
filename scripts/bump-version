@@ -1,7 +1,12 @@
 #!/usr/bin/env python3
-"""Set a plugin's version in both tool manifests and open a changelog entry.
+"""Bump a plugin's version in both tool manifests and open a changelog entry.
 
-Usage: scripts/bump-version <plugin> <major|minor|patch|X.Y.Z>
+Usage: scripts/bump-version <plugin> [major]
+
+Versions are <major>.<days since the major version started>.<increment within
+that day>. Each major version's start date is recorded in the plugin's
+CHANGELOG.md as "Major version N started on YYYY-MM-DD." Pass `major` to start
+a new major version today.
 """
 import datetime
 import json
@@ -10,47 +15,49 @@ import re
 import sys
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
+START = re.compile(r"^Major version (\d+) started on (\d{4}-\d{2}-\d{2})\.$", re.M)
 
 
 def main():
-    if len(sys.argv) != 3:
+    if len(sys.argv) not in (2, 3) or (len(sys.argv) == 3 and sys.argv[2] != "major"):
         sys.exit(__doc__.strip())
-    plugin, target = sys.argv[1], sys.argv[2]
-    plugin_dir = ROOT / "plugins" / plugin
+    plugin_dir = ROOT / "plugins" / sys.argv[1]
+    new_major = len(sys.argv) == 3
     manifests = [plugin_dir / ".claude-plugin" / "plugin.json",
                  plugin_dir / ".codex-plugin" / "plugin.json"]
+    changelog = plugin_dir / "CHANGELOG.md"
+    text = changelog.read_text()
+    today = datetime.date.today()
 
     versions = {json.loads(m.read_text())["version"] for m in manifests}
     if len(versions) != 1:
         sys.exit(f"Manifests disagree: {sorted(versions)}")
     current = versions.pop()
-    new = next_version(current, target)
+    major, day, increment = map(int, current.split("."))
+
+    starts = {int(n): datetime.date.fromisoformat(d) for n, d in START.findall(text)}
+    if new_major:
+        major += 1
+        starts[major] = today
+        line = f"Major version {major} started on {today}."
+        text = text.replace("\n\n", f"\n\n{line}\n\n", 1)
+    if major not in starts:
+        sys.exit(f"{changelog.relative_to(ROOT)} has no start date for major version {major}.")
+
+    new_day = (today - starts[major]).days
+    new_increment = increment + 1 if not new_major and new_day == day else 1
+    new = f"{major}.{new_day}.{new_increment}"
 
     for m in manifests:
         data = json.loads(m.read_text())
         data["version"] = new
         m.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n")
 
-    changelog = plugin_dir / "CHANGELOG.md"
-    text = changelog.read_text()
-    entry = f"## {new} ({datetime.date.today()})\n\n- \n\n"
-    text = text.replace("\n## ", f"\n{entry}## ", 1) if "\n## " in text else text + "\n" + entry
+    entry = f"## {new} ({today})\n\n- \n\n"
+    text = text.replace("\n## ", f"\n{entry}## ", 1) if "\n## " in text else text.rstrip("\n") + "\n\n" + entry
     changelog.write_text(text)
 
-    print(f"{plugin}: {current} -> {new}. Fill in {changelog.relative_to(ROOT)}.")
-
-
-def next_version(current, target):
-    if re.fullmatch(r"\d+\.\d+\.\d+", target):
-        return target
-    major, minor, patch = map(int, current.split("."))
-    if target == "major":
-        return f"{major + 1}.0.0"
-    if target == "minor":
-        return f"{major}.{minor + 1}.0"
-    if target == "patch":
-        return f"{major}.{minor}.{patch + 1}"
-    sys.exit(f"Unknown version target: {target}")
+    print(f"{sys.argv[1]}: {current} -> {new}. Fill in {changelog.relative_to(ROOT)}.")
 
 
 if __name__ == "__main__":

@@ -27,14 +27,19 @@ codex plugin add directives@ai-tools
 ## Update
 
 Each plugin's version lives in its two `plugin.json` files. The tools update
-an installed plugin only when this version changes.
+an installed plugin only when this version changes, so bump it with every
+completed change.
+
+A version is `<major>.<days since the major version started>.<increment
+within that day>`. Each plugin's `CHANGELOG.md` records the start date of
+each major version.
 
 1. Change the plugin.
-2. Run `scripts/bump-version <plugin> patch` (or `minor`, `major`, or an
-   exact `X.Y.Z`). It sets the version in both manifests and adds an entry to
-   the plugin's `CHANGELOG.md`.
+2. Run `scripts/bump-version <plugin>`. It sets the version in both
+   manifests and adds an entry to the plugin's `CHANGELOG.md`. To start a
+   new major version today, run `scripts/bump-version <plugin> major`.
 3. Describe the change in that entry, then commit and push.
-3. Refresh the marketplace:
+4. Refresh the marketplace:
    - Claude Code: `claude plugin marketplace update ai-tools`
    - Codex: `codex plugin marketplace upgrade`
 
@@ -42,5 +47,5 @@ an installed plugin only when this version changes.
 
 - `plugins/<plugin>/`: each plugin, with a manifest for each tool in
   `.claude-plugin/` and `.codex-plugin/`, and its skills in `skills/`.
-- `directives/`: the sync state that the `directives:sync` skill reads and
-  writes. The first sync creates it.
+- `directives/AGENTS.md`: the master copy of the shared directives, which
+  the `directives:sync` skill reads and writes. The first sync creates it.

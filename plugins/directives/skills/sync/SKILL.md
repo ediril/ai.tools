@@ -1,180 +1,199 @@
 ---
 name: sync
-description: Sync the shared, project-agnostic directives across every project's AGENTS.md. Finds what each project added, changed, or deleted since the last sync, resolves conflicts with the user, and applies the result to every project without touching project-specific directives. Use for "sync directives", "sync AGENTS.md", or "consolidate directives".
+description: Sync the shared, project-agnostic directives across every project's AGENTS.md. Reads what each project added, changed, or deleted since the last sync, merges it into one master file, then decides which master directives apply to each project and updates them, without touching project-specific directives. Use for "sync directives", "sync AGENTS.md", or "consolidate directives".
 ---
 
 # Sync directives
 
 Each project's `AGENTS.md` mixes two kinds of directives:
 
-- **Shared directives** are project-agnostic. They hold in any project of the
-  kinds they apply to.
+- **Shared directives** are project-agnostic.
 - **Project-specific directives** name the project's files, domain, data,
   commands, dates, or decisions.
 
 Shared directives evolve in whichever project the user happens to be working
-in. This skill carries those changes to every other project, and it never
-moves, rewords, or removes a project-specific directive.
+in. A sync runs in two directions:
+
+1. **Inbound:** collect each project's changes to shared directives into one
+   master file.
+2. **Outbound:** decide which master directives apply to each project, and
+   update the project.
+
+The sync never moves, rewords, or removes a project-specific directive.
 
 ## Locations
 
-- **Projects:** `~/Documents/^_PROJ/*/AGENTS.md`. Skip `attic/` and
-  `ai.tools/`.
-- **Sync state:** `~/Documents/^_PROJ/ai.tools/directives/`. This is the
-  user's local checkout of the ai.tools repo, not the installed plugin copy.
-  If the folder is missing, ask the user where the checkout is.
-  - `baseline.md`: the shared directives as of the last sync. This is the
-    common ancestor for the comparison.
-  - `projects.md`: each project's kinds and local exceptions.
+- **Projects:** every top-level folder of `~/Documents/^_PROJ` that has an
+  `AGENTS.md`, plus `ai.tools/` itself, which is a project like any other.
+  If the user names projects, read and write only those. If a project has no
+  `AGENTS.md`, outbound proposes one.
+- **Master file:** `~/Documents/^_PROJ/ai.tools/directives/AGENTS.md`, in the
+  user's local checkout of the ai.tools repo, not in the installed plugin
+  copy. It is separate from the repo's own `ai.tools/AGENTS.md`. If the
+  checkout is missing, ask the user where it is.
+- **Memory copies:** a project's directives may say that its Claude memory
+  file is an exact copy of `AGENTS.md`. That file is `MEMORY.md` in
+  `~/.claude/projects/<folder>/memory/`, where `<folder>` is the project's
+  absolute path with every character other than a letter or digit replaced
+  by `-`. For example, `~/Documents/^_PROJ/ai.tools` maps to
+  `-Users-<user>-Documents---PROJ-ai-tools`.
 
-If the user names projects, read and write only those projects. If a named
-project has no `AGENTS.md`, offer to create one from the baseline directives
-that match its kinds.
+The sync works best from a session started in `~/Documents/^_PROJ`, so that
+every project is inside the session's folder.
 
-## State formats
+## No cached state
 
-`baseline.md`:
+The master file holds only the shared directives and the time of the last
+sync. Do not record anything about individual projects. Each project's git
+history is the record of what it chose: what it added, reworded, or removed,
+and when. Read it on every run.
+
+Master file format:
 
 ```markdown
 # Shared directives
 
-Last sync: 2026-11-19
+Last sync: 2026-11-19 21:30
 
 ## Working Style
 
 - Investigate the root cause before fixing.
-- [web] Before reporting a UI change done, drive the real interactions in a
-  browser.
+- Before reporting a change done, drive the real interactions in the app.
 ```
 
-- An untagged directive applies to every project.
-- A tagged directive, such as `[web]` or `[cli]`, applies only to projects of
-  that kind.
-- Section names are canonical. Projects may use different headings, so match
-  sections by meaning.
-- Write directives in neutral terms: "the project's test suites", not
-  "pytest".
+- Write directives in neutral terms, so that each one reads correctly in any
+  project it applies to: "the project's test suites", not "pytest".
+- Section names in the master are canonical. Projects may use different
+  headings, so match sections by meaning.
 
-`projects.md`:
+If the master file does not exist, follow [First run](#first-run).
 
-```markdown
-| Project  | Kinds |
-| -------- | ----- |
-| doshmodo | web   |
-| hlsync   | cli   |
-
-## Local exceptions
-
-- doshmodo, Versioning: keeps its own version scheme. Do not apply the shared
-  versioning directive.
-```
-
-A local exception records that a project deliberately diverges from a shared
-directive, either with its own wording or by opting out. Respect every
-exception on every run.
-
-## Procedure
-
-If `baseline.md` does not exist, follow [Bootstrap](#bootstrap) instead of
-steps 2 and 3.
-
-### 1. Gather
+## 1. Inbound: projects to master
 
 For each project:
 
 1. Read `AGENTS.md`.
-2. Run `git -C <project> log --since=<last sync> -p -- AGENTS.md` to see what
-   the project changed since the last sync.
-3. Run `git -C <project> status --porcelain -- AGENTS.md`. Uncommitted edits
-   are part of the project's current state. Mention them in the report.
+2. Read the project's changes to it since the last sync:
+   - Committed: `git -C <project> log --since="<last sync>" -p -- AGENTS.md`
+   - Uncommitted: `git -C <project> diff HEAD -- AGENTS.md`. Mention
+     uncommitted edits in the report.
+3. If the project keeps a memory copy, compare it with `AGENTS.md`. An agent
+   may have edited either one. If they differ, show the difference and ask
+   which version is current. Treat the answer as the project's current
+   `AGENTS.md`. If the copy is missing, propose creating it. If it is a
+   symlink to `AGENTS.md`, skip this check.
+4. Skip changes to project-specific directives. If you can't tell whether a
+   directive is shared or project-specific, ask.
+5. Sort each change to a shared directive:
+   - **Added:** a new directive. Add it to the master, reworded in neutral
+     terms if needed.
+   - **Edited:** a master directive that the project reworded, tightened, or
+     extended. If the new wording reads correctly in any project, adopt it.
+     If it is tailored to this project, ask: adopt it everywhere, or keep it
+     local to this project?
+   - **Deleted:** a master directive that the project removed. The intent
+     is ambiguous, so always ask: drop it everywhere, or just here?
 
-### 2. Classify each project's differences
+Also read the changes to the master file since the last sync, committed and
+uncommitted, in the ai.tools checkout. The user may have edited it directly.
 
-Compare each project's file with the baseline, filtered by the project's kinds
-and exceptions. Each difference is one of these:
+Ask questions as they come up while you read, a few at a time. Do not
+hold them all to the end.
 
-- **Added:** a directive that is not in the baseline. Decide whether it is
-  shared or project-specific. It is shared only if it reads correctly in other
-  projects as written, or after a neutral rewording. If you are not sure, ask.
-- **Changed:** a baseline directive that the project reworded, tightened, or
-  extended.
-- **Deleted:** a baseline directive that applies to the project but is no
-  longer in its file.
-- **Not yet applied:** a baseline directive that the project never received.
-  This is not a change by the project.
+Changes from different projects can conflict:
 
-Use the git history to tell these apart:
+- Two projects edited the same directive differently.
+- One project edited a directive and another deleted it.
+- An addition duplicates or contradicts a master directive.
 
-- A difference that the project made since the last sync is the project's
-  change.
-- A directive is deleted only if the log shows the project removing it since
-  the last sync. Otherwise, it is not yet applied.
-- A difference that is older than the last sync is a local variant. Ask
-  whether to record it as a local exception or overwrite it.
+If the versions differ only in wording, propose the newest one by commit
+date, and say so. If they differ in substance, quote each version with its
+project and date, and ask.
 
-### 3. Resolve conflicts
+## 2. Outbound: master to projects
 
-Merge the changes from all projects into one change set. These are conflicts:
+Keep a copy of the master as it was before this run. Then, for each project,
+compare every master directive with the project's file:
 
-- Two projects changed the same directive differently.
-- One project changed a directive and another project deleted it.
-- An addition duplicates or contradicts an existing directive.
+- **Present with the same meaning:** leave it alone.
+- **Present with different wording:** check the project's history.
+  - If the project's wording matches an earlier version of the master
+    directive (the pre-run copy, or the master file's git history),
+    the project only has the old version. Update it.
+  - Otherwise, the project chose its own wording. That wording is a local
+    variant. Leave it alone, and list it in the change set.
+- **Missing:** search the project's full history for the directive in any
+  wording: `git -C <project> log -p -- AGENTS.md`.
+  - If the project had it and removed it, respect the removal. Do not
+    re-add it.
+  - If the project never had it, decide whether it fits this project, using
+    the project's `AGENTS.md`, `README.md`, and build files. If it fits,
+    propose adding it. If not, say why in the change set.
 
-For a conflict in wording only, propose the newest version by commit date and
-say so. For a conflict in substance, quote each version with its project and
-date, and ask the user. Do not resolve a conflict in substance silently. Batch
-the questions, a few at a time.
+Decide fit fresh on every run. Do not rely on an earlier run's decision.
 
-### 4. Confirm
+A project with no `AGENTS.md` has never had any directive. Propose a new
+file with the directives that fit it, in the master's sections and order.
+If the master tells projects to keep a memory copy, propose that copy too.
+
+## 3. Confirm
 
 Before you write anything, show the change set:
 
-- For each directive: the action, the source project and date, the target
-  section, and the projects that receive it.
-- The projects that receive no change, and why (kind or exception).
+- **Master:** each directive added, edited, or removed, with its source
+  project and date.
+- **Per project:** each directive to add, update, or remove, and its target
+  section.
+- **Left alone:** local variants, respected removals, and directives
+  judged not to fit, each with a one-line reason.
 
-Wait for the user's approval.
+Wait for the user's approval. The user may drop items or move a directive
+in or out of a project.
 
-### 5. Apply
+## 4. Apply
 
-1. Update `baseline.md`, including the `Last sync` date. Update `projects.md`
-   with any new kinds or exceptions.
+1. Update the master file, including the `Last sync` time (local time, to
+   the minute).
 2. Edit each project's `AGENTS.md`:
    - Put each addition in the section that matches it by meaning. Follow the
      file's heading style, bullet style, and line wrapping. Create a section
      only if no section matches.
-   - Replace changed directives in place. Remove deleted directives.
+   - Replace updated directives in place. Remove directives that were
+     dropped everywhere.
    - Do not reorder, reword, or reformat anything else.
-3. If the project's directives say that a memory file is an exact copy of
-   `AGENTS.md`, apply the same edits to that file. If it is a symlink, do
-   nothing.
-4. Do not commit in the projects or in ai.tools unless the user asks.
+3. If the project keeps a memory copy, make it identical to the new
+   `AGENTS.md`. If it is a symlink, do nothing.
+4. Do not commit unless the user asks. Remind the user that each project's
+   history is the record that the next sync reads. A sync's edits and
+   decisions only count once they are committed. This includes the master
+   file in ai.tools.
 
-### 6. Verify
+## 5. Verify
 
 1. Run `git -C <project> diff -- AGENTS.md` for each project you changed.
    Every hunk must match an approved change, and no project-specific line may
-   be changed or removed. Fix any hunk that does not match.
-2. Report each project: the directives added, changed, and removed, with a
+   change. Fix any hunk that does not match.
+2. Check that each memory copy is identical to its `AGENTS.md`.
+3. Report each project: the directives added, updated, and removed, with a
    short name for each, and the projects left unchanged.
 
-## Bootstrap
+## First run
 
-Use this on the first run, when no baseline exists.
+When the master file does not exist, build it before the outbound step:
 
-1. Propose each project's kinds (for example, web app or CLI) from its
-   `README.md` and build files. Ask the user to confirm them, then write
-   `projects.md`.
-2. Split every `AGENTS.md` into individual directives. Set aside the
-   project-specific ones.
-3. Group the remaining directives by meaning across projects. For each group,
-   start from the newest wording, using `git blame --date=short` for the date
-   of each line. Merge in points from older versions only if the newest
+1. Split every project's `AGENTS.md` into individual directives. Set aside
+   the project-specific ones.
+2. Group the remaining directives by meaning across projects. For each group,
+   start from the newest wording, using `git blame --date=short` for the
+   date of each line. Merge in points from older versions only if the newest
    version lacks them and they still hold.
-4. Tag the directives that fit only some kinds of project.
-5. Ask the user about:
+3. Ask the user about:
    - Groups whose versions disagree in substance.
-   - Directives that appear in only one or two projects: spread them, or keep
+   - Directives that appear in only one or two projects: share them, or keep
      them local?
-6. Write `baseline.md`. Then continue with step 4 (Confirm), and treat every
-   baseline directive that is missing from a project as an addition.
+4. Hold the result as the proposed master, with no earlier version. Run
+   [Outbound](#2-outbound-master-to-projects). Treat a project's differing
+   wording as the old version unless it is tailored to the project. If it is
+   tailored, ask.
+5. Continue with [Confirm](#3-confirm). Write the master file only after
+   approval.

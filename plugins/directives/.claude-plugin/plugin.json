@@ -1,11 +1,15 @@
 {
   "name": "directives",
-  "version": "0.1.0",
+  "version": "0.0.3",
   "description": "Keep the shared, project-agnostic directives in every project's AGENTS.md in sync.",
   "author": {
     "name": "Emrah Diril"
   },
   "homepage": "https://github.com/ediril/ai.tools",
   "repository": "https://github.com/ediril/ai.tools",
-  "keywords": ["agents-md", "directives", "sync"]
+  "keywords": [
+    "agents-md",
+    "directives",
+    "sync"
+  ]
 }
