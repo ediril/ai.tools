@@ -5,10 +5,10 @@
   },
   "plugins": [
     {
-      "name": "directives",
+      "name": "emd-directives",
       "source": {
         "source": "local",
-        "path": "./plugins/directives"
+        "path": "./plugins/emd-directives"
       },
       "policy": {
         "installation": "AVAILABLE",

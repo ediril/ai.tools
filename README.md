@@ -6,7 +6,7 @@ My agent skills, packaged as a plugin marketplace for Claude Code and Codex.
 
 | Plugin | Skill | What it does |
 | --- | --- | --- |
-| `directives` | `sync` | Syncs the shared, project-agnostic directives across every project's `AGENTS.md`, without touching project-specific directives. |
+| `emd-directives` | `sync` | Syncs the shared, project-agnostic directives across every project's `AGENTS.md`, without touching project-specific directives. |
 
 ## Install
 
@@ -14,14 +14,14 @@ Claude Code:
 
 ```sh
 claude plugin marketplace add ediril/ai.tools
-claude plugin install directives@ai-tools
+claude plugin install emd-directives@ai-tools
 ```
 
 Codex:
 
 ```sh
 codex plugin marketplace add ediril/ai.tools
-codex plugin add directives@ai-tools
+codex plugin add emd-directives@ai-tools
 ```
 
 ## Update
@@ -48,4 +48,4 @@ each major version.
 - `plugins/<plugin>/`: each plugin, with a manifest for each tool in
   `.claude-plugin/` and `.codex-plugin/`, and its skills in `skills/`.
 - `directives/AGENTS.md`: the master copy of the shared directives, which
-  the `directives:sync` skill reads and writes. The first sync creates it.
+  the `emd-directives:sync` skill reads and writes. The first sync creates it.

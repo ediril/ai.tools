@@ -2,6 +2,12 @@
 
 Major version 0 started on 2026-11-19.
 
+## 0.0.4 (2026-11-19)
+
+- Renamed the plugin from `directives` to `emd-directives`, so that it does
+  not collide with another plugin of the same name. The command is now
+  `/emd-directives:sync`.
+
 ## 0.0.3 (2026-11-19)
 
 - The sync now includes ai.tools as a project, and proposes an `AGENTS.md`
