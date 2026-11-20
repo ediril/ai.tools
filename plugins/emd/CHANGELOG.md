@@ -2,6 +2,19 @@
 
 Major version 0 started on 2026-11-19.
 
+## 0.1.3 (2026-11-20)
+
+- `sync-directives` no longer keeps a copy of `AGENTS.md` in each project's
+  Claude memory folder. Claude Code now reads `AGENTS.md` directly and in
+  full, while a memory copy loaded the directives a second time, cut off
+  after 200 lines. The sync proposes removing every file in the memory
+  folders, after merging any directives that aren't in `AGENTS.md`.
+- The sync now proposes `"autoMemoryEnabled": false` in
+  `~/.claude/settings.json` when it isn't set.
+- A `CLAUDE.md` whose only content is `@AGENTS.md` counts as consolidated.
+  The sync now warns that a `CLAUDE.local.md` stops Claude Code from
+  reading `AGENTS.md`.
+
 ## 0.1.2 (2026-11-20)
 
 - Pinned interrogate's reviewers to exact models at high effort: Opus 5.5

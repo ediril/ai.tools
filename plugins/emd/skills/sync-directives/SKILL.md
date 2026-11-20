@@ -37,12 +37,11 @@ projects directly inside the session's folder.
   checkout, not the installed plugin copy. The master file is separate from
   the repo's own `AGENTS.md`. If there is no checkout in the projects folder,
   ask the user where it is.
-- **Memory copies:** a project's directives may say that its Claude memory
-  file is an exact copy of `AGENTS.md`. That file is `MEMORY.md` in
-  `~/.claude/projects/<folder>/memory/`, where `<folder>` is the project's
-  absolute path with every character other than a letter or digit replaced
-  by `-`. For example, `/Users/me/code/ai.tools` maps to
-  `-Users-me-code-ai-tools`.
+- **Claude memory folders:** `~/.claude/projects/<folder>/memory/`, where
+  `<folder>` is the project's absolute path with every character other than
+  a letter or digit replaced by `-`. For example, `/Users/me/code/ai.tools`
+  maps to `-Users-me-code-ai-tools`. Claude Code reads a project's
+  `AGENTS.md` directly, so no directive belongs in these folders.
 
 Before you start, check the session's folder. If it is itself a project (it
 has a `.git` folder or an `AGENTS.md`), or it holds fewer than two projects,
@@ -78,6 +77,22 @@ Last sync: 2026-11-19 21:30
 
 If the master file does not exist, follow [First run](#first-run).
 
+## How Claude Code reads the directives
+
+Claude Code reads a project's `AGENTS.md` directly, in full, when there is
+no `CLAUDE.md` or `CLAUDE.local.md` in the project or a folder above it.
+Codex reads `AGENTS.md` too, so one file serves both tools. Two things get
+in the way:
+
+- **Another instruction file.** A `CLAUDE.md` or `CLAUDE.local.md` makes
+  Claude Code read that file instead of `AGENTS.md`. See
+  [Other directive files](#other-directive-files).
+- **Auto memory.** Claude keeps its own notes in the project's memory folder
+  and loads them into every session, next to `AGENTS.md`. The user keeps
+  every directive in `AGENTS.md` instead, so auto memory stays off. On every
+  run, read `~/.claude/settings.json`. If it does not set
+  `"autoMemoryEnabled": false`, add that setting to the change set.
+
 ## Other directive files
 
 Other tools read their own instruction files. All of a project's directives
@@ -85,22 +100,28 @@ belong in its `AGENTS.md`, so the sync consolidates these files into it:
 
 - In the project: `CLAUDE.md`, `GEMINI.md`, `.cursorrules`, `.cursor/rules/`,
   `.windsurfrules`, `.clinerules`, and `.github/copilot-instructions.md`.
-- In the project's Claude memory folder: every file other than `MEMORY.md`.
+- In the project's Claude memory folder: every file, `MEMORY.md` included.
 
 For each file you find:
 
-- If it is a symlink to `AGENTS.md`, it is already consolidated. Leave it.
+- A project file that is a symlink to `AGENTS.md`, or a `CLAUDE.md` whose
+  only content is the import line `@AGENTS.md`, is already consolidated.
+  Leave it. Claude Code reads the content once.
 - Otherwise, compare each directive in it with `AGENTS.md`. Skip duplicates.
   Treat every other directive as an addition to the project's `AGENTS.md`:
   inbound sorts it into shared or project-specific like any other addition.
   If a directive contradicts `AGENTS.md`, quote both and ask which holds.
-- Propose removing the file once its directives are in `AGENTS.md`. Before
-  you remove a `CLAUDE.md`, make sure Claude Code still reads the
-  directives: the project needs a memory copy of `AGENTS.md` or a symlink to
-  it.
+- Propose removing the file once its directives are in `AGENTS.md`. Propose
+  removing every file in the memory folder, including a `MEMORY.md` that is
+  an exact copy of `AGENTS.md` or a symlink to it: Claude Code already reads
+  `AGENTS.md`, so a copy only loads the directives a second time, cut off
+  after 200 lines.
 
-Leave personal, untracked files such as `CLAUDE.local.md` alone, and mention
-them in the report. Their content may not belong in a committed file.
+Leave personal, untracked files such as `CLAUDE.local.md` alone, since their
+content may not belong in a committed file. But tell the user that such a
+file stops Claude Code from reading the project's `AGENTS.md`. They can move
+its content to a git-ignored file that nothing loads automatically, or set
+Claude Code's **Project instructions** setting to `claude-md-and-agents-md`.
 
 ## 1. Inbound: projects to master
 
@@ -112,14 +133,9 @@ For each project:
    - Committed: `git -C <project> log --since="<last sync>" -p -- AGENTS.md`
    - Uncommitted: `git -C <project> diff HEAD -- AGENTS.md`. Mention
      uncommitted edits in the report.
-3. If the project keeps a memory copy, compare it with `AGENTS.md`. An agent
-   may have edited either one. If they differ, show the difference and ask
-   which version is current. Treat the answer as the project's current
-   `AGENTS.md`. If the copy is missing, propose creating it. If it is a
-   symlink to `AGENTS.md`, skip this check.
-4. Skip changes to project-specific directives. If you can't tell whether a
+3. Skip changes to project-specific directives. If you can't tell whether a
    directive is shared or project-specific, ask.
-5. Sort each change to a shared directive:
+4. Sort each change to a shared directive:
    - **Added:** a new directive. Add it to the master, reworded in neutral
      terms if needed.
    - **Edited:** a master directive that the project reworded, tightened, or
@@ -175,7 +191,6 @@ Decide fit fresh on every run. Do not rely on an earlier run's decision.
 
 A project with no `AGENTS.md` has never had any directive. Propose a new
 file with the directives that fit it, in the master's sections and order.
-If the master tells projects to keep a memory copy, propose that copy too.
 
 ## 3. Confirm
 
@@ -185,6 +200,8 @@ Before you write anything, show the change set:
   project and date.
 - **Per project:** each directive to add, update, or remove, and its target
   section, and each other directive file to consolidate and remove.
+- **Settings:** adding `"autoMemoryEnabled": false` to
+  `~/.claude/settings.json`, if it is not set.
 - **Left alone:** local variants, respected removals, and directives
   judged not to fit, each with a one-line reason.
 
@@ -202,9 +219,9 @@ in or out of a project.
    - Replace updated directives in place. Remove directives that were
      dropped everywhere.
    - Do not reorder, reword, or reformat anything else.
-3. If the project keeps a memory copy, make it identical to the new
-   `AGENTS.md`. If it is a symlink, do nothing.
-4. Remove the other directive files that were approved for removal.
+3. Remove the other directive files that were approved for removal.
+4. If approved, add `"autoMemoryEnabled": false` to
+   `~/.claude/settings.json`. Keep every other setting in the file as it is.
 5. Do not commit unless the user asks. Remind the user that each project's
    history is the record that the next sync reads. A sync's edits and
    decisions only count once they are committed. This includes the master
@@ -215,8 +232,9 @@ in or out of a project.
 1. Run `git -C <project> diff -- AGENTS.md` for each project you changed.
    Every hunk must match an approved change, and no project-specific line may
    change. Fix any hunk that does not match.
-2. Check that each memory copy is identical to its `AGENTS.md`, and that
-   every directive from a removed file is in `AGENTS.md`.
+2. Check that every directive from a removed file is in `AGENTS.md`, that
+   the memory folders hold no files, and that `~/.claude/settings.json`
+   still parses and sets `"autoMemoryEnabled": false`.
 3. Report each project: the directives added, updated, and removed, with a
    short name for each, and the projects left unchanged.
 4. End with a ready-to-paste commit message for each changed project and

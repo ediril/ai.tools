@@ -50,7 +50,10 @@ apart again.
 
 The sync also folds other agent instruction files, such as `CLAUDE.md` or
 `.cursorrules`, into each project's `AGENTS.md`, and removes them after you
-approve.
+approve. Claude Code and Codex both read `AGENTS.md` directly, so the sync
+also clears Claude's per-project memory folders and turns auto memory off
+(`"autoMemoryEnabled": false` in `~/.claude/settings.json`), so that no
+directives live outside `AGENTS.md`.
 
 ## Running interrogate
 

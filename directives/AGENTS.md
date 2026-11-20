@@ -137,10 +137,9 @@ Last sync: 2026-11-20 00:20
 - This file holds the working directives. When the user gives a durable
   directive, preference or correction, record it here, or in a decision note
   when it makes a substantial architectural choice.
-- The agent's memory file
-  (`~/.claude/projects/<this project>/memory/MEMORY.md`) is an exact copy of
-  this file, or a link to it: whenever one changes, update the other to match.
-  Keep no directives in separate memory files.
+- Claude Code and Codex both read this file directly. Keep no directives,
+  and no copy of this file, in Claude's memory folder
+  (`~/.claude/projects/<this project>/memory/`); auto memory stays off.
 - Do a single line of work yourself, in the main checkout, where the user can
   see it; delegate only independent work that runs in parallel. The user
   cannot see what a subagent does. Use a separate worktree only for work that

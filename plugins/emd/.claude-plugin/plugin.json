@@ -1,6 +1,6 @@
 {
   "name": "emd",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Personal agent skills: sync shared AGENTS.md directives across projects, and run multi-model adversarial reviews.",
   "author": {
     "name": "Emrah Diril"
