@@ -1,6 +1,6 @@
 # Shared directives
 
-Last sync: 2026-11-19 23:28
+Last sync: 2026-11-20 00:20
 
 ## Design And Implementation
 
@@ -143,8 +143,8 @@ Last sync: 2026-11-19 23:28
   Keep no directives in separate memory files.
 - Do a single line of work yourself, in the main checkout, where the user can
   see it; delegate only independent work that runs in parallel. The user
-  cannot see what a subagent does. Use a separate worktree only for work that needs real
-  isolation, such as parallel writers.
+  cannot see what a subagent does. Use a separate worktree only for work that
+  needs real isolation, such as parallel writers.
 - Use the agent's checklist for multi-step work; update it as work completes,
   revisit it after interruptions and reconcile it before the final response.
   Use `TASK.md` only when persistence is genuinely needed or requested.
