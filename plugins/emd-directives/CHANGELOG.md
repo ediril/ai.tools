@@ -2,6 +2,18 @@
 
 Major version 0 started on 2026-11-19.
 
+## 0.0.6 (2026-11-19)
+
+Fixes from the first real sync:
+
+- When a project's own directive contradicts a master directive, the sync
+  now asks about the conflict instead of quietly leaving the master
+  directive out of that project.
+- The check for past removals now reads uncommitted edits too, so a
+  directive deleted in an uncommitted edit is not added back.
+- The sync now ends with a ready-to-paste commit message for each changed
+  project and for the master file.
+
 ## 0.0.5 (2026-11-19)
 
 - The sync no longer assumes one machine's folder layout. It treats the

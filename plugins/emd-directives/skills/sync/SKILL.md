@@ -158,12 +158,18 @@ compare every master directive with the project's file:
   - Otherwise, the project chose its own wording. That wording is a local
     variant. Leave it alone, and list it in the change set.
 - **Missing:** search the project's full history for the directive in any
-  wording: `git -C <project> log -p -- AGENTS.md`.
+  wording, committed and uncommitted: `git -C <project> log -p -- AGENTS.md`
+  and `git -C <project> diff HEAD -- AGENTS.md`.
   - If the project had it and removed it, respect the removal. Do not
     re-add it.
   - If the project never had it, decide whether it fits this project, using
     the project's `AGENTS.md`, `README.md`, and build files. If it fits,
     propose adding it. If not, say why in the change set.
+- **Contradicted by one of the project's own directives:** this is a
+  conflict, not a question of fit. Do not settle it by leaving the master
+  directive out. Quote both, and ask: does the master directive hold here
+  too, should the project's directive replace it in the master, or is this
+  a local exception?
 
 Decide fit fresh on every run. Do not rely on an earlier run's decision.
 
@@ -213,6 +219,10 @@ in or out of a project.
    every directive from a removed file is in `AGENTS.md`.
 3. Report each project: the directives added, updated, and removed, with a
    short name for each, and the projects left unchanged.
+4. End with a ready-to-paste commit message for each changed project and
+   one for the master file in ai.tools, with no attribution trailer. Use
+   each project's subject style from its `git log`. If a project has other
+   uncommitted changes, say so, and say which files the message covers.
 
 ## First run
 

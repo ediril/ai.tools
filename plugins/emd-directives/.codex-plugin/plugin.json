@@ -1,6 +1,6 @@
 {
   "name": "emd-directives",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Keep the shared, project-agnostic directives in every project's AGENTS.md in sync.",
   "author": {
     "name": "Emrah Diril"
