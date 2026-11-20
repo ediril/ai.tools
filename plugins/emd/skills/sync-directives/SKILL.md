@@ -1,5 +1,5 @@
 ---
-name: sync
+name: sync-directives
 description: Sync the shared, project-agnostic directives across every project's AGENTS.md. Reads what each project added, changed, or deleted since the last sync, merges it into one master file, then decides which master directives apply to each project and updates them, without touching project-specific directives. Use for "sync directives", "sync AGENTS.md", or "consolidate directives".
 ---
 

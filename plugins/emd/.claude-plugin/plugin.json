@@ -1,0 +1,17 @@
+{
+  "name": "emd",
+  "version": "0.1.2",
+  "description": "Personal agent skills: sync shared AGENTS.md directives across projects, and run multi-model adversarial reviews.",
+  "author": {
+    "name": "Emrah Diril"
+  },
+  "homepage": "https://github.com/ediril/ai.tools",
+  "repository": "https://github.com/ediril/ai.tools",
+  "keywords": [
+    "agents-md",
+    "directives",
+    "sync",
+    "code-review",
+    "interrogate"
+  ]
+}

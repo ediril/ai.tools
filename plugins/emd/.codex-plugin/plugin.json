@@ -1,7 +1,7 @@
 {
-  "name": "emd-directives",
-  "version": "0.0.6",
-  "description": "Keep the shared, project-agnostic directives in every project's AGENTS.md in sync.",
+  "name": "emd",
+  "version": "0.1.2",
+  "description": "Personal agent skills: sync shared AGENTS.md directives across projects, and run multi-model adversarial reviews.",
   "author": {
     "name": "Emrah Diril"
   },
@@ -10,12 +10,14 @@
   "keywords": [
     "agents-md",
     "directives",
-    "sync"
+    "sync",
+    "code-review",
+    "interrogate"
   ],
   "skills": "./skills/",
   "interface": {
-    "displayName": "emd-directives",
-    "shortDescription": "Sync shared AGENTS.md directives across projects",
+    "displayName": "emd",
+    "shortDescription": "Directive sync and multi-model review",
     "developerName": "Emrah Diril",
     "category": "Developer Tools",
     "capabilities": [
@@ -24,7 +26,8 @@
       "Write"
     ],
     "defaultPrompt": [
-      "Sync the shared directives across my projects."
+      "Sync the shared directives across my projects.",
+      "Interrogate the current change."
     ]
   }
 }

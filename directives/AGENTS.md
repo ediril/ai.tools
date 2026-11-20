@@ -116,7 +116,8 @@ Last sync: 2026-11-19 23:28
   or control flow. Fix what is behavior- and architecture-preserving; record
   questionable mechanisms for discussion rather than changing them during
   cleanup. This review is the agent's own; do not spawn a reviewer for it. A
-  thorough review uses the `interrogate` skill.
+  multi-model review is `/emd:interrogate`, run only when the user asks for
+  it.
 - Before calling UI or interaction work done, drive the real interactions in
   the app (in a browser, for a web UI) while watching for errors, with a
   browser test for a new interaction where the project has browser tests, and
@@ -132,9 +133,7 @@ Last sync: 2026-11-19 23:28
 
 - Before starting work, and after every compaction, reread this file, the
   decisions relevant to the work and the unfinished tasks. Do not rely only on
-  the conversation summary. After a compaction, invoke the `pstack:poteto-mode`
-  skill again and follow it: the matched playbook's checklist, the review of
-  every diff before reporting a step done, and its rules for replies.
+  the conversation summary.
 - This file holds the working directives. When the user gives a durable
   directive, preference or correction, record it here, or in a decision note
   when it makes a substantial architectural choice.
@@ -143,9 +142,8 @@ Last sync: 2026-11-19 23:28
   this file, or a link to it: whenever one changes, update the other to match.
   Keep no directives in separate memory files.
 - Do a single line of work yourself, in the main checkout, where the user can
-  see it; delegate only independent work that runs in parallel, even when a
-  skill or playbook says delegation is mandatory. The user cannot see what a
-  subagent does. Use a separate worktree only for work that needs real
+  see it; delegate only independent work that runs in parallel. The user
+  cannot see what a subagent does. Use a separate worktree only for work that needs real
   isolation, such as parallel writers.
 - Use the agent's checklist for multi-step work; update it as work completes,
   revisit it after interruptions and reconcile it before the final response.

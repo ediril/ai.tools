@@ -2,6 +2,24 @@
 
 Major version 0 started on 2026-11-19.
 
+## 0.1.2 (2026-11-20)
+
+- Pinned interrogate's reviewers to exact models at high effort: Opus 5.5
+  and Fable 5.2 through two new agents, `emd:opus-5-5-high` and
+  `emd:fable-5-2-high`, and GPT 6.1 Sol through the Codex command.
+
+## 0.1.1 (2026-11-20)
+
+- Renamed the plugin from `emd-directives` to `emd`, which will hold all of
+  these skills. The sync skill is now `sync-directives`, run as
+  `/emd:sync-directives`.
+- Added `interrogate`, adapted from pstack's skill of the same name.
+  Reviewers on different models try to break a change, and only findings
+  proven by a run survive. A small change gets GPT and Opus; a large one
+  gets Fable, Opus, and GPT. Reviewers read the checkout but write only to
+  their own temporary folders, with no git worktrees. It runs only when the
+  user asks for it.
+
 ## 0.0.6 (2026-11-19)
 
 Fixes from the first real sync:

@@ -6,11 +6,17 @@
   "description": "Personal agent skills for Claude Code and Codex.",
   "plugins": [
     {
-      "name": "emd-directives",
-      "source": "./plugins/emd-directives",
-      "description": "Keep the shared, project-agnostic directives in every project's AGENTS.md in sync.",
+      "name": "emd",
+      "source": "./plugins/emd",
+      "description": "Personal agent skills: sync shared AGENTS.md directives across projects, and run multi-model adversarial reviews.",
       "homepage": "https://github.com/ediril/ai.tools",
-      "keywords": ["agents-md", "directives", "sync"]
+      "keywords": [
+        "agents-md",
+        "directives",
+        "sync",
+        "code-review",
+        "interrogate"
+      ]
     }
   ]
 }
