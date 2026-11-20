@@ -2,6 +2,13 @@
 
 Major version 0 started on 2026-11-19.
 
+## 0.1.4 (2026-11-20)
+
+- The sync now proposes deleting every project `CLAUDE.md`, including a
+  symlink to `AGENTS.md` and one that only imports it, in favor of
+  `AGENTS.md`. If the user keeps a `CLAUDE.md`, it recommends making
+  `@AGENTS.md` its only content.
+
 ## 0.1.3 (2026-11-20)
 
 - `sync-directives` no longer keeps a copy of `AGENTS.md` in each project's
@@ -11,8 +18,7 @@ Major version 0 started on 2026-11-19.
   folders, after merging any directives that aren't in `AGENTS.md`.
 - The sync now proposes `"autoMemoryEnabled": false` in
   `~/.claude/settings.json` when it isn't set.
-- A `CLAUDE.md` whose only content is `@AGENTS.md` counts as consolidated.
-  The sync now warns that a `CLAUDE.local.md` stops Claude Code from
+- The sync now warns that a `CLAUDE.local.md` stops Claude Code from
   reading `AGENTS.md`.
 
 ## 0.1.2 (2026-11-20)

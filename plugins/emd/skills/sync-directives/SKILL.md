@@ -104,18 +104,22 @@ belong in its `AGENTS.md`, so the sync consolidates these files into it:
 
 For each file you find:
 
-- A project file that is a symlink to `AGENTS.md`, or a `CLAUDE.md` whose
-  only content is the import line `@AGENTS.md`, is already consolidated.
-  Leave it. Claude Code reads the content once.
-- Otherwise, compare each directive in it with `AGENTS.md`. Skip duplicates.
-  Treat every other directive as an addition to the project's `AGENTS.md`:
-  inbound sorts it into shared or project-specific like any other addition.
-  If a directive contradicts `AGENTS.md`, quote both and ask which holds.
-- Propose removing the file once its directives are in `AGENTS.md`. Propose
-  removing every file in the memory folder, including a `MEMORY.md` that is
-  an exact copy of `AGENTS.md` or a symlink to it: Claude Code already reads
-  `AGENTS.md`, so a copy only loads the directives a second time, cut off
-  after 200 lines.
+- A symlink to `AGENTS.md`, an exact copy of it, or a `CLAUDE.md` whose only
+  content is the import line `@AGENTS.md` has nothing to merge.
+- For any other file, compare each directive in it with `AGENTS.md`. Skip
+  duplicates. Treat every other directive as an addition to the project's
+  `AGENTS.md`: inbound sorts it into shared or project-specific like any
+  other addition. If a directive contradicts `AGENTS.md`, quote both and ask
+  which holds.
+- Propose removing every one of these files once its directives are in
+  `AGENTS.md`, symlinks and import-only `CLAUDE.md` files included. Claude
+  Code and Codex read `AGENTS.md` directly, so these files are not needed.
+  A copy in the memory folder also loads the directives a second time, cut
+  off after 200 lines.
+- If the user wants to keep a project's `CLAUDE.md`, recommend replacing its
+  content with the import line `@AGENTS.md`, after its directives are in
+  `AGENTS.md`. Claude Code then still reads `AGENTS.md`, once. If it already
+  holds only that line, leave it.
 
 Leave personal, untracked files such as `CLAUDE.local.md` alone, since their
 content may not belong in a committed file. But tell the user that such a
